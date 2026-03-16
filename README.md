@@ -4,6 +4,13 @@
 
 ---
 
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green)
+![Verilog](https://img.shields.io/badge/Verilog-Icarus-orange)
+![License](https://img.shields.io/badge/License-MIT-purple)
+![Platform](https://img.shields.io/badge/Platform-VLSI%20%2B%20Embedded-red)
+```
+
 ## What This Project Does
 
 Traditional hardware verification requires engineers to manually write test cases, run simulations, inspect waveforms, and generate reports — all using separate tools. This platform automates the entire workflow.
