@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Hardware Verification Lab</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://js.puter.com/v2/"></script>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚡</div>
+  <div>
+    <h1>AI Hardware Verification Lab</h1>
+    <p>Autonomous VLSI &amp; Embedded Simulation Platform using MCP</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="api-status">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-label">Checking API...</span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('vlsi')">🔬 VLSI Verification</button>
+    <button class="tab-btn"        onclick="switchTab('esp32')">🔧 ESP32 Embedded</button>
+  </div>
+
+  <!-- VLSI Tab -->
+  <div id="tab-vlsi" class="tab-content active">
+    <div class="top-bar">
+      <h2>Designs</h2>
+      <div class="controls">
+        <input type="text" id="design-input" placeholder="Design name (e.g. example_cpu)">
+        <button class="btn btn-primary"   onclick="runFullReportInput()">▶ Run Report</button>
+        <button class="btn btn-secondary" onclick="generateTBInput()">✦ Generate TB</button>
+      </div>
+    </div>
+    <div class="designs-grid" id="designs-grid">
+      <div class="empty-state">
+        <div class="icon">🔬</div>
+        <p>Loading designs...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESP32 Tab -->
+  <div id="tab-esp32" class="tab-content">
+    <div class="top-bar">
+      <h2>ESP32 Virtual Simulator</h2>
+      <div class="controls">
+        <button class="btn btn-primary"   onclick="runESP32Full()">▶ Run All Programs</button>
+        <button class="btn btn-secondary" onclick="resetESP32()">↺ Reset</button>
+      </div>
+    </div>
+
+    <!-- ESP32 Status Bar -->
+    <div class="esp32-statusbar" id="esp32-statusbar">
+      <div class="esp32-chip">
+        <span class="chip-icon">📟</span>
+        <div>
+          <div class="chip-name">ESP32 — Xtensa LX6 @ 240MHz</div>
+          <div class="chip-sub">Flash: 4MB  RAM: 520KB  (Virtual Simulation)</div>
+        </div>
+      </div>
+      <div class="esp32-stats">
+        <div class="esp32-stat" id="esp32-pass-count">
+          <div class="esp32-val green">—</div>
+          <div class="esp32-lbl">Passed</div>
+        </div>
+        <div class="esp32-stat" id="esp32-fail-count">
+          <div class="esp32-val red">—</div>
+          <div class="esp32-lbl">Failed</div>
+        </div>
+        <div class="esp32-stat">
+          <div class="esp32-val blue" id="esp32-programs-count">4</div>
+          <div class="esp32-lbl">Programs</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ESP32 Program Cards -->
+    <div class="esp32-grid" id="esp32-grid">
+
+      <!-- GPIO Card -->
+      <div class="esp32-card" id="esp32-card-gpio">
+        <div class="esp32-card-header">
+          <div class="esp32-card-title">
+            <span>💡</span><span>GPIO Control</span>
+          </div>
+          <span class="badge badge-gray" id="esp32-badge-gpio">Idle</span>
+        </div>
+        <div class="esp32-card-body">
+          <div class="pin-row">
+            <div class="pin-box" id="pin-gpio2">
+              <div class="pin-light off" id="pin-light-2"></div>
+              <div class="pin-label">GPIO2 LED</div>
+            </div>
+            <div class="pin-box">
+              <div class="pin-light off" id="pin-light-0"></div>
+              <div class="pin-label">GPIO0 BTN</div>
+            </div>
+          </div>
+          <div class="cycle-bar" id="cycle-bar"></div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-primary btn-sm" onclick="runESP32GPIO()">▶ Run</button>
+        </div>
+        <div class="output-panel" id="esp32-out-gpio"></div>
+      </div>
+
+      <!-- Sensor Card -->
+      <div class="esp32-card" id="esp32-card-sensor">
+        <div class="esp32-card-header">
+          <div class="esp32-card-title">
+            <span>🌡</span><span>Sensor Reading</span>
+          </div>
+          <span class="badge badge-gray" id="esp32-badge-sensor">Idle</span>
+        </div>
+        <div class="esp32-card-body">
+          <div class="sensor-row">
+            <div class="sensor-box">
+              <div class="sensor-val" id="sensor-temp">—</div>
+              <div class="sensor-lbl">Temp °C</div>
+            </div>
+            <div class="sensor-box">
+              <div class="sensor-val" id="sensor-volt">—</div>
+              <div class="sensor-lbl">Voltage V</div>
+            </div>
+            <div class="sensor-box">
+              <div class="sensor-val" id="sensor-avg">—</div>
+              <div class="sensor-lbl">Avg °C</div>
+            </div>
+          </div>
+          <div class="temp-chart" id="temp-chart"></div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-primary btn-sm" onclick="runESP32Sensor()">▶ Run</button>
+        </div>
+        <div class="output-panel" id="esp32-out-sensor"></div>
+      </div>
+
+      <!-- PWM Card -->
+      <div class="esp32-card" id="esp32-card-pwm">
+        <div class="esp32-card-header">
+          <div class="esp32-card-title">
+            <span>⚙</span><span>PWM Control</span>
+          </div>
+          <span class="badge badge-gray" id="esp32-badge-pwm">Idle</span>
+        </div>
+        <div class="esp32-card-body">
+          <div class="pwm-row">
+            <div class="pwm-channel">
+              <div class="pwm-label">Motor GPIO18</div>
+              <div class="pwm-bar-wrap">
+                <div class="pwm-bar" id="pwm-motor"></div>
+              </div>
+              <div class="pwm-pct" id="pwm-motor-pct">0%</div>
+            </div>
+            <div class="pwm-channel">
+              <div class="pwm-label">LED GPIO19</div>
+              <div class="pwm-bar-wrap">
+                <div class="pwm-bar" id="pwm-led" style="background:#fbbf24"></div>
+              </div>
+              <div class="pwm-pct" id="pwm-led-pct">0%</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-primary btn-sm" onclick="runESP32PWM()">▶ Run</button>
+        </div>
+        <div class="output-panel" id="esp32-out-pwm"></div>
+      </div>
+
+      <!-- UART Card -->
+      <div class="esp32-card" id="esp32-card-uart">
+        <div class="esp32-card-header">
+          <div class="esp32-card-title">
+            <span>📡</span><span>UART Communication</span>
+          </div>
+          <span class="badge badge-gray" id="esp32-badge-uart">Idle</span>
+        </div>
+        <div class="esp32-card-body">
+          <div class="uart-stats">
+            <div class="uart-stat">
+              <span class="uart-val" id="uart-sent">0</span>
+              <span class="uart-lbl">Sent</span>
+            </div>
+            <div class="uart-stat">
+              <span class="uart-val" id="uart-recv">0</span>
+              <span class="uart-lbl">Received</span>
+            </div>
+            <div class="uart-stat">
+              <span class="uart-val" id="uart-baud">115200</span>
+              <span class="uart-lbl">Baud</span>
+            </div>
+          </div>
+          <div class="uart-monitor" id="uart-monitor"></div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-primary btn-sm" onclick="runESP32UART()">▶ Run</button>
+        </div>
+        <div class="output-panel" id="esp32-out-uart"></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/esp32.js"></script>
+</body>
+</html>
