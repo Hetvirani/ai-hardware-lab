@@ -7,7 +7,7 @@
 ![Verilog](https://img.shields.io/badge/Verilog-Icarus-orange)
 ![License](https://img.shields.io/badge/License-MIT-purple)
 ![Platform](https://img.shields.io/badge/Platform-VLSI%20%2B%20Embedded-red)
-```
+
 ---
 
 ## What This Project Does
@@ -27,12 +27,28 @@ The same platform also runs a virtual ESP32 simulator for embedded system verifi
 ---
 
 ## Live Demo
-```
+```bash
 # Start everything with one command
 start.bat
 ```
 
 Open `http://localhost:3000` to see the dashboard.
+
+---
+
+## Screenshots
+
+### VLSI Verification Dashboard
+![VLSI Dashboard](screenshots/vlsi-dashboard.png)
+
+### Simulation Output with AI Analysis
+![VLSI Output](screenshots/vlsi-output.png)
+
+### ESP32 Embedded Simulation
+![ESP32 Dashboard](screenshots/esp32-dashboard.png)
+
+### REST API Endpoints
+![API Docs](screenshots/api-docs.png)
 
 ---
 
@@ -161,21 +177,6 @@ pip install fastapi uvicorn pydantic flask
 start.bat                    # Windows
 ```
 
-## Screenshots
-
-### VLSI Verification Dashboard
-![VLSI Dashboard](screenshots/vlsi-dashboard.png)
-
-### Simulation Output with AI Analysis
-![VLSI Output](screenshots/vlsi-output.png)
-
-### ESP32 Embedded Simulation
-![ESP32 Dashboard](screenshots/esp32-dashboard.png)
-
-### REST API Endpoints
-![API Docs](screenshots/api-docs.png)
-
-
 ### Manual start (two terminals)
 
 **Terminal 1 — API Server**
@@ -254,7 +255,3 @@ The project combines five areas rarely seen together in student work:
 Het Virani
 
 ---
-
-## License
-
-MIT License
