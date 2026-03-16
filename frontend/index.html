@@ -32,6 +32,35 @@
 
   <!-- VLSI Tab -->
   <div id="tab-vlsi" class="tab-content active">
+     <!-- Upload section -->
+    <div class="upload-section">
+      <div class="upload-section-title">
+        <span>⬆</span> Upload Verilog Design
+      </div>
+      <input
+        type="text"
+        id="vlsi-upload-name"
+        class="design-name-field"
+        placeholder="Design name (e.g. my_alu) — folder will be created automatically">
+      <div
+        class="upload-zone"
+        id="vlsi-upload-zone"
+        onclick="document.getElementById('vlsi-file-input').click()"
+        ondragover="handleDragOver(event, 'vlsi')"
+        ondragleave="handleDragLeave(event, 'vlsi')"
+        ondrop="handleDrop(event, 'vlsi')">
+        <input
+          type="file"
+          id="vlsi-file-input"
+          class="upload-input"
+          accept=".v"
+          onchange="handleFileSelect(event, 'vlsi')">
+        <div class="upload-icon">📄</div>
+        <div class="upload-title">Drop your .v file here or click to browse</div>
+        <div class="upload-sub">Supports any Verilog module file</div>
+      </div>
+      <div class="upload-result" id="vlsi-upload-result"></div>
+    </div>
     <div class="top-bar">
       <h2>Designs</h2>
       <div class="controls">
@@ -50,6 +79,51 @@
 
   <!-- ESP32 Tab -->
   <div id="tab-esp32" class="tab-content">
+    <div class="upload-section">
+      <div class="upload-section-title">
+        <span>⬆</span> Upload Embedded Project
+      </div>
+      <div
+        class="upload-zone"
+        id="embedded-upload-zone"
+        onclick="document.getElementById('embedded-file-input').click()"
+        ondragover="handleDragOver(event, 'embedded')"
+        ondragleave="handleDragLeave(event, 'embedded')"
+        ondrop="handleDrop(event, 'embedded')">
+        <input
+          type="file"
+          id="embedded-file-input"
+          class="upload-input"
+          accept=".py"
+          onchange="handleFileSelect(event, 'embedded')">
+        <div class="upload-icon">🐍</div>
+        <div class="upload-title">Drop your .py project file here or click to browse</div>
+        <div class="upload-sub">
+          Must have a run(esp) function — see template below
+        </div>
+      </div>
+      <div class="upload-result" id="embedded-upload-result"></div>
+
+      <!-- Template hint -->
+      <div style="margin-top:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px">
+        <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">
+          Project template
+        </div>
+        <div style="font-family:monospace;font-size:11px;color:#4f46e5;line-height:1.8">
+          <div>"""</div>
+          <div>Project: Your Project Name</div>
+          <div>Platform: ESP32</div>
+          <div>Description: What this does</div>
+          <div>"""</div>
+          <div>&nbsp;</div>
+          <div>def run(esp):</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;esp.uart_begin(115200)</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;esp.uart_print("Hello ESP32")</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;esp.tick(100)</div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;return {"project": "Name", "status": "PASS"}</div>
+        </div>
+      </div>
+    </div>
     <div class="top-bar">
       <h2>ESP32 Virtual Simulator</h2>
       <div class="controls">

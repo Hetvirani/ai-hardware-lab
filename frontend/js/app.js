@@ -521,3 +521,121 @@ window.addEventListener("load", async () => {
   }
   document.getElementById("design-input").value = "";
 });
+
+// ── File Upload ───────────────────────────────────────────
+function handleDragOver(e, type) {
+  e.preventDefault();
+  document.getElementById(`${type}-upload-zone`).classList.add("dragover");
+}
+
+function handleDragLeave(e, type) {
+  document.getElementById(`${type}-upload-zone`).classList.remove("dragover");
+}
+
+function handleDrop(e, type) {
+  e.preventDefault();
+  document.getElementById(`${type}-upload-zone`).classList.remove("dragover");
+  const file = e.dataTransfer.files[0];
+  if (file) processUpload(file, type);
+}
+
+function handleFileSelect(e, type) {
+  const file = e.target.files[0];
+  if (file) processUpload(file, type);
+}
+
+async function processUpload(file, type) {
+  const zone      = document.getElementById(`${type}-upload-zone`);
+  const resultDiv = document.getElementById(`${type}-upload-result`);
+
+  // Validate file type
+  if (type === "vlsi" && !file.name.endsWith(".v")) {
+    showUploadResult(type, `Error: Only .v files allowed. Got: ${file.name}`, "err");
+    return;
+  }
+  if (type === "embedded" && !file.name.endsWith(".py")) {
+    showUploadResult(type, `Error: Only .py files allowed. Got: ${file.name}`, "err");
+    return;
+  }
+
+  zone.querySelector(".upload-title").textContent = `Uploading ${file.name}...`;
+  zone.classList.remove("success", "error");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    let res, data;
+
+    if (type === "vlsi") {
+      const designName = document.getElementById("vlsi-upload-name").value.trim()
+        || file.name.replace(".v", "");
+      formData.append("design_name", designName);
+      res  = await fetch(`${API}/upload/vlsi`, { method: "POST", body: formData });
+      data = await res.json();
+
+      if (data.status === "success") {
+        zone.classList.add("success");
+        zone.querySelector(".upload-title").textContent = `✓ ${file.name} uploaded`;
+        zone.querySelector(".upload-sub").textContent   =
+          `Design: ${data.design_name}  •  ${data.size_bytes} bytes`;
+        showUploadResult(
+          type,
+          `✓ Saved to designs/${data.design_name}/${data.filename} — Click Run Report to verify`,
+          "ok"
+        );
+
+        // Auto-populate the design input and load card
+        document.getElementById("design-input").value = data.design_name;
+        setTimeout(() => runFullReport(data.design_name), 500);
+
+      } else {
+        zone.classList.add("error");
+        zone.querySelector(".upload-title").textContent = "Upload failed";
+        showUploadResult(type, data.error || "Upload failed", "err");
+      }
+
+    } else {
+      res  = await fetch(`${API}/upload/embedded`, { method: "POST", body: formData });
+      data = await res.json();
+
+      if (data.status === "success") {
+        zone.classList.add("success");
+        zone.querySelector(".upload-title").textContent = `✓ ${file.name} uploaded`;
+        zone.querySelector(".upload-sub").textContent   =
+          `Saved to embedded/projects  •  ${data.size_bytes} bytes`;
+        showUploadResult(
+          type,
+          `✓ Project saved as ${data.filename} — reloading project list...`,
+          "ok"
+        );
+
+        // Reload project list and run the new project
+        const projectName = file.name.replace(".py", "");
+        setTimeout(async () => {
+          await loadEmbeddedProjects();
+          await runSingleProject(projectName);
+        }, 600);
+
+      } else {
+        zone.classList.add("error");
+        zone.querySelector(".upload-title").textContent = "Upload failed";
+        showUploadResult(type, data.error || "Upload failed", "err");
+      }
+    }
+
+  } catch(e) {
+    zone.classList.add("error");
+    zone.querySelector(".upload-title").textContent = "Upload failed";
+    showUploadResult(type, "Cannot reach API — is uvicorn running?", "err");
+  }
+
+  // Reset file input so same file can be uploaded again
+  document.getElementById(`${type}-file-input`).value = "";
+}
+
+function showUploadResult(type, msg, cls) {
+  const div     = document.getElementById(`${type}-upload-result`);
+  div.textContent = msg;
+  div.className   = `upload-result show ${cls}`;
+}

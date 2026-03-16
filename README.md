@@ -7,6 +7,7 @@
 ![Verilog](https://img.shields.io/badge/Verilog-Icarus-orange)
 ![License](https://img.shields.io/badge/License-MIT-purple)
 ![Platform](https://img.shields.io/badge/Platform-VLSI%20%2B%20Embedded-red)
+![ESP32](https://img.shields.io/badge/ESP32-Virtual%20Simulation-blue)
 
 ---
 
@@ -22,7 +23,7 @@ Drop any Verilog design file into the system. The platform automatically:
 - Returns a structured verification report via REST API
 - Uses Claude AI to explain results in plain English
 
-The same platform also runs a virtual ESP32 simulator for embedded system verification.
+The same platform also runs a virtual ESP32 simulator for embedded system verification — supporting GPIO, sensors, PWM, and UART.
 
 ---
 
@@ -54,20 +55,24 @@ Open `http://localhost:3000` to see the dashboard.
 
 ## Project Architecture
 ```
-User / Dashboard
-       │
-       ▼
-   MCP Server (FastAPI)
-       │
-   ┌───┴───────────────┐
-   │                   │
-   ▼                   ▼
-VLSI Engine        ESP32 Simulator
-   │                   │
-   ├── Simulation       ├── GPIO Control
-   ├── TB Generator     ├── Sensor Reading
-   ├── Waveform         ├── PWM Control
-   └── Design Analysis  └── UART Comm
+User / Web Dashboard (localhost:3000)
+              │
+              ▼
+    FastAPI MCP Server (:8000)
+              │
+    ┌─────────┴──────────────┐
+    │                        │
+    ▼                        ▼
+VLSI Engine             ESP32 Simulator
+    │                        │
+    ├── Simulation Engine     ├── GPIO Controller
+    ├── AI Testbench Gen      ├── Sensor Simulator
+    ├── Waveform Analyzer     ├── PWM Controller
+    └── Design Analyzer       └── UART Engine
+              │
+              ▼
+    Claude AI via Puter.js
+    (no API key required)
 ```
 
 ---
@@ -75,27 +80,33 @@ VLSI Engine        ESP32 Simulator
 ## Features
 
 ### VLSI Verification
+- Drag and drop any `.v` file — folder created automatically
 - Automatic testbench generation from any Verilog module
+- AI-powered testbench generation using Claude (writes real test cases)
 - Simulation using Icarus Verilog (industry standard)
 - Waveform signal analysis from VCD files
 - Static design analysis — detects overflow risks, missing resets, undriven signals
-- Generic engine works with any `.v` file
-- Claude AI explains verification results
+- Claude AI explains verification results in plain English
 
 ### ESP32 Embedded Simulation
-- Virtual ESP32 hardware simulation
+- Drag and drop any `.py` project file — runs automatically
+- Virtual ESP32 hardware simulation (no physical hardware needed)
+- Generic project runner — any program with `run(esp)` function works
 - GPIO control with LED blink cycles
 - Temperature and voltage sensor simulation
 - PWM motor and LED control
 - UART serial communication with loopback testing
+- 4 built-in example programs + 4 generic projects included
 
 ### Web Dashboard
-- Two-tab interface — VLSI and Embedded
+- Two-tab interface — VLSI Verification and ESP32 Embedded
+- File upload with drag and drop for both `.v` and `.py` files
 - Live pass/fail results with progress bars
 - Signal tag display from waveform analysis
 - Design warning alerts
 - AI Report button — Claude analyzes your design
-- AI Gen TB button — Claude writes a testbench for any design
+- AI Gen TB button — Claude writes a smart testbench
+- One-click startup with `start.bat`
 
 ---
 
@@ -105,10 +116,12 @@ VLSI Engine        ESP32 Simulator
 |---|---|
 | Simulation | Icarus Verilog, VVP |
 | Backend | Python, FastAPI |
+| File Upload | python-multipart |
 | AI Integration | Claude via Puter.js (no API key needed) |
 | Protocol | MCP — Model Context Protocol |
 | Frontend | HTML, CSS, JavaScript |
-| Embedded | Python virtual ESP32 simulator |
+| Embedded Engine | Python virtual ESP32 simulator |
+| Frontend Server | Flask |
 
 ---
 
@@ -117,36 +130,43 @@ VLSI Engine        ESP32 Simulator
 ai-hardware-lab/
 │
 ├── mcp_server/
-│   ├── server.py          # FastAPI server — all endpoints
-│   └── tools.py           # MCP tool functions
+│   ├── server.py               # FastAPI server — 20+ endpoints
+│   └── tools.py                # MCP tool functions
 │
 ├── vlsi/
-│   ├── alu.v              # ALU design
-│   ├── testbench.v        # ALU testbench
-│   ├── test_generator.py  # Simulation engine
-│   ├── waveform_analyzer.py
-│   └── design_analyzer.py
+│   ├── alu.v                   # ALU design
+│   ├── testbench.v             # ALU testbench — 64 test cases
+│   ├── test_generator.py       # Generic simulation engine
+│   ├── waveform_analyzer.py    # VCD signal analysis
+│   └── design_analyzer.py      # Static code analysis
 │
 ├── designs/
-│   ├── example_cpu/       # CPU design — 14 test cases
-│   └── uart_tx/           # UART transmitter
+│   ├── example_cpu/            # CPU design — 14 test cases
+│   └── uart_tx/                # UART transmitter
 │
 ├── embedded/
-│   ├── esp32_simulator.py # Virtual ESP32 hardware
-│   └── esp32_programs.py  # GPIO, sensor, PWM, UART programs
+│   ├── esp32_simulator.py      # Virtual ESP32 hardware model
+│   ├── esp32_programs.py       # Built-in GPIO/sensor/PWM/UART programs
+│   ├── project_runner.py       # Generic project runner
+│   └── projects/               # Drop any .py project here
+│       ├── blink_led.py
+│       ├── temperature_monitor.py
+│       ├── motor_control.py
+│       └── smart_sensor.py
 │
 ├── ai_agent/
-│   ├── agent.py           # Verification report agent
-│   └── tb_generator.py    # AI testbench generator
+│   ├── agent.py                # Verification report agent
+│   └── tb_generator.py         # AI testbench generator
 │
 ├── frontend/
-│   ├── index.html         # Dashboard
-│   ├── css/style.css
-│   ├── js/app.js          # VLSI tab logic
-│   ├── js/esp32.js        # ESP32 tab logic
-│   └── serve.py           # Local frontend server
+│   ├── index.html              # Dashboard — two tabs
+│   ├── css/style.css           # Light theme
+│   ├── js/app.js               # VLSI tab logic + file upload
+│   ├── js/esp32.js             # ESP32 tab — dynamic project cards
+│   └── serve.py                # Flask frontend server
 │
-├── start.bat              # One-click startup
+├── requirements.txt
+├── start.bat                   # One-click startup
 └── README.md
 ```
 
@@ -171,7 +191,7 @@ venv\Scripts\activate        # Windows
 source venv/bin/activate     # Mac/Linux
 
 # Install dependencies
-pip install fastapi uvicorn pydantic flask
+pip install fastapi uvicorn pydantic flask python-multipart
 
 # Start everything
 start.bat                    # Windows
@@ -195,13 +215,36 @@ Open `http://localhost:3000`
 
 ---
 
-## How to Verify Any Design
+## How to Verify Any Verilog Design
 
-1. Create a folder inside `designs/` with your design name
-2. Drop your `.v` file inside
-3. Open dashboard, type your design name, click **Generate TB**
-4. Click **Run Report**
+1. Open dashboard → VLSI tab
+2. Type a design name in the upload field
+3. Drag and drop your `.v` file into the upload zone
+4. Platform auto-creates the folder, runs simulation, shows results
 5. Click **AI Report** for Claude's analysis
+
+---
+
+## How to Add Any Embedded Project
+
+1. Open dashboard → ESP32 tab
+2. Drag and drop your `.py` project file into the upload zone
+3. Project appears automatically and runs immediately
+
+Your project file must have a `run(esp)` function:
+```python
+"""
+Project: My Project
+Platform: ESP32
+Description: What this does
+"""
+
+def run(esp):
+    esp.uart_begin(115200)
+    esp.uart_print("Hello ESP32")
+    esp.tick(100)
+    return {"project": "My Project", "status": "PASS"}
+```
 
 ---
 
@@ -214,12 +257,13 @@ Open `http://localhost:3000`
 | `GET /analyze_waveform/{design}` | Waveform signal analysis |
 | `GET /analyze_design/{design}` | Static code analysis |
 | `GET /generate_testbench/{design}` | Auto-generate testbench |
+| `POST /upload/vlsi` | Upload .v file and create design |
+| `POST /upload/embedded` | Upload .py project file |
 | `POST /save_testbench/{design}` | Save AI-generated testbench |
-| `GET /esp32/full` | Run all ESP32 programs |
-| `GET /esp32/gpio` | GPIO simulation |
-| `GET /esp32/sensor` | Sensor reading simulation |
-| `GET /esp32/pwm` | PWM control simulation |
-| `GET /esp32/uart` | UART communication simulation |
+| `GET /esp32/full` | Run all built-in ESP32 programs |
+| `GET /embedded/projects` | List all generic projects |
+| `GET /embedded/run/{project}` | Run a specific project |
+| `GET /embedded/run_all` | Run all generic projects |
 
 ---
 
@@ -234,6 +278,10 @@ Open `http://localhost:3000`
 | ESP32 Sensors | 8 samples | ✅ Pass |
 | ESP32 PWM | 9 steps | ✅ Pass |
 | ESP32 UART | 8 messages | ✅ Pass |
+| LED Blink | 6 cycles | ✅ Pass |
+| Temperature Monitor | 10 samples | ✅ Pass |
+| Motor Control | 10 steps | ✅ Pass |
+| Smart Sensor Node | 8 packets | ✅ Pass |
 
 ---
 
@@ -252,6 +300,6 @@ The project combines five areas rarely seen together in student work:
 
 ## Author
 
-Het Virani
+Het Virani — [GitHub](https://github.com/Hetvirani)
 
 ---

@@ -1,10 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../embedded")))
+# ── Path setup ────────────────────────────────────────────
+embedded_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../embedded"))
+sys.path.insert(0, embedded_path)
 
 from esp32_programs import (
     run_gpio_led_blink,
@@ -13,6 +15,7 @@ from esp32_programs import (
     run_uart_communication,
     run_full_esp32_demo
 )
+from project_runner import list_projects, run_project, run_all_projects
 from tools import (
     run_vlsi_simulation,
     analyze_vlsi_waveform,
@@ -100,7 +103,7 @@ def save_testbench(design_name: str, payload: TestbenchPayload):
     }
 
 
-# ── ESP32 endpoints ───────────────────────────────────────
+# ── ESP32 fixed programs ──────────────────────────────────
 @app.get("/esp32/gpio")
 def esp32_gpio():
     return run_gpio_led_blink()
@@ -120,3 +123,66 @@ def esp32_uart():
 @app.get("/esp32/full")
 def esp32_full():
     return run_full_esp32_demo()
+
+
+# ── Generic embedded project endpoints ───────────────────
+@app.get("/embedded/projects")
+def get_projects():
+    return {"projects": list_projects()}
+
+@app.get("/embedded/run/{project_name}")
+def run_embedded_project(project_name: str):
+    return run_project(project_name)
+
+@app.get("/embedded/run_all")
+def run_all_embedded():
+    return run_all_projects()
+
+# ── File upload endpoints ─────────────────────────────────
+@app.post("/upload/vlsi")
+async def upload_vlsi(
+    file: UploadFile = File(...),
+    design_name: str = Form(...)
+):
+    designs_root = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../designs")
+    )
+    design_path = os.path.join(designs_root, design_name)
+    os.makedirs(design_path, exist_ok=True)
+
+    file_path = os.path.join(design_path, file.filename)
+    content   = await file.read()
+
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    return {
+        "status":      "success",
+        "design_name": design_name,
+        "filename":    file.filename,
+        "path":        file_path,
+        "size_bytes":  len(content)
+    }
+
+
+@app.post("/upload/embedded")
+async def upload_embedded(
+    file: UploadFile = File(...)
+):
+    projects_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../embedded/projects")
+    )
+    os.makedirs(projects_path, exist_ok=True)
+
+    file_path = os.path.join(projects_path, file.filename)
+    content   = await file.read()
+
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    return {
+        "status":   "success",
+        "filename": file.filename,
+        "path":     file_path,
+        "size_bytes": len(content)
+    }
