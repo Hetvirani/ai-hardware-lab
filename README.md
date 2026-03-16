@@ -155,6 +155,21 @@ pip install fastapi uvicorn pydantic flask
 start.bat                    # Windows
 ```
 
+## Screenshots
+
+### VLSI Verification Dashboard
+![VLSI Dashboard](screenshots/vlsi-dashboard.png)
+
+### Simulation Output with AI Analysis
+![VLSI Output](screenshots/vlsi-output.png)
+
+### ESP32 Embedded Simulation
+![ESP32 Dashboard](screenshots/esp32-dashboard.png)
+
+### REST API Endpoints
+![API Docs](screenshots/api-docs.png)
+
+
 ### Manual start (two terminals)
 
 **Terminal 1 — API Server**
