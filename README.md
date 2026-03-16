@@ -2,14 +2,13 @@
 
 > Automated VLSI verification and ESP32 embedded simulation platform powered by AI and Model Context Protocol architecture.
 
----
-
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green)
 ![Verilog](https://img.shields.io/badge/Verilog-Icarus-orange)
 ![License](https://img.shields.io/badge/License-MIT-purple)
 ![Platform](https://img.shields.io/badge/Platform-VLSI%20%2B%20Embedded-red)
 ```
+---
 
 ## What This Project Does
 
