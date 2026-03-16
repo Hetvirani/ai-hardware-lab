@@ -140,7 +140,7 @@ ai-hardware-lab/
 ### Setup
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/ai-hardware-lab.git
+git clone https://github.com/Hetvirani/ai-hardware-lab.git
 cd ai-hardware-lab
 
 # Create virtual environment
